@@ -16,6 +16,13 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         super("HAWIYA - Main Window");
+        // Optionally set the system look and feel (if available)
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignore) {
+            // If not available, ignore
+        }
+
         this.mainController = new MainController();
         initUI();
     }
@@ -25,19 +32,55 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Branding label
+        // -- Create a default Customer (example) --
+        Customer defaultCustomer = new Customer(
+                2,
+                "john_doe",
+                "pass",
+                "john@example.com",
+                "1234567890",
+                "Cairo, Egypt"
+        );
+        mainController.setCurrentCustomer(defaultCustomer);
+
+        // -- Menu Bar --
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem exitItem = new JMenuItem("Exit");
+        exitItem.addActionListener(e -> System.exit(0));
+        fileMenu.add(exitItem);
+
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutItem = new JMenuItem("About HAWIYA");
+        aboutItem.addActionListener(e ->
+                JOptionPane.showMessageDialog(
+                        this,
+                        "HAWIYA Restaurant System\nVersion 1.0\nEnjoy your meal!",
+                        "About",
+                        JOptionPane.INFORMATION_MESSAGE
+                )
+        );
+        helpMenu.add(aboutItem);
+
+        menuBar.add(fileMenu);
+        menuBar.add(helpMenu);
+
+        setJMenuBar(menuBar);
+
+        // -- Main Content Panel --
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
         JLabel titleLabel = new JLabel("Welcome to HAWIYA Restaurant System", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        panel.add(titleLabel);
 
         // Buttons
         JButton menuButton = new JButton("View Menu");
-        JButton orderButton = new JButton("Create Order");
-        JButton checkoutButton = new JButton("Checkout");
+        JButton orderButton = new JButton("Create Order (With Checkboxes)");
+        // If you want a direct checkout button (skipping the confirm flow), keep this:
+        // JButton checkoutButton = new JButton("Checkout");
 
-        // Create a default Customer to use in this example
-        Customer defaultCustomer = new Customer(2, "john_doe", "pass", "john@example.com", "1234567890", "Cairo, Egypt");
-        mainController.setCurrentCustomer(defaultCustomer);
-
+        // "View Menu" -> open MenuPage
         menuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -45,29 +88,35 @@ public class MainWindow extends JFrame {
                 menuPage.setVisible(true);
             }
         });
+        panel.add(menuButton);
 
+        // "Create Order" -> open the checkbox-based order page
         orderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OrderPage orderPage = new OrderPage(mainController.getCurrentCustomer());
+                // If you have a new checkbox-based OrderPage:
+                OrderPageWithCheckBoxes orderPage = new OrderPageWithCheckBoxes(mainController.getCurrentCustomer());
                 orderPage.setVisible(true);
             }
         });
+        panel.add(orderButton);
 
+        // Optional direct checkout button:
+        /*
         checkoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                CheckoutPage checkoutPage = new CheckoutPage(mainController.getCurrentCustomer());
+                // Typically you'd need an existing Bill with items.
+                // If no order has been created, this might be empty.
+                CheckoutPage checkoutPage = new CheckoutPage(
+                        // If you have an OrderController somewhere, pass its Bill:
+                        someOrderController.getCurrentBill()
+                );
                 checkoutPage.setVisible(true);
             }
         });
-
-        // Layout
-        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
-        panel.add(titleLabel);
-        panel.add(menuButton);
-        panel.add(orderButton);
         panel.add(checkoutButton);
+        */
 
         add(panel);
     }

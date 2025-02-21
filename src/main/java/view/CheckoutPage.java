@@ -1,9 +1,7 @@
 package view;
 
 import control.CheckoutController;
-import control.OrderController;
 import models.Bill;
-import models.Customer;
 import models.PaymentMethod;
 
 import javax.swing.*;
@@ -13,33 +11,34 @@ import java.awt.event.ActionListener;
 
 /**
  * Allows user to select a payment method and finalize the order.
- * In a real system, you'd pass in the existing Bill or OrderController.
+ * Now it accepts an existing Bill (with items already added).
  */
 public class CheckoutPage extends JFrame {
     private CheckoutController checkoutController;
-    private OrderController orderController;
+    private Bill bill;
     private JComboBox<PaymentMethod> paymentMethodCombo;
     private JLabel statusLabel;
 
-    public CheckoutPage(Customer customer) {
+    public CheckoutPage(Bill bill) {
         super("HAWIYA - Checkout");
-        // For simplicity, create a new order or retrieve from somewhere
-        // Typically you'd share an existing OrderController.
-        this.orderController = new OrderController(customer);
-        // For demonstration, let's just pretend the order already has items:
-        // (No items means total=0, which won't pass validation.)
-        // this.orderController.addMainDishToOrder(...);
-
         this.checkoutController = new CheckoutController();
+        this.bill = bill;
         initUI();
     }
 
     private void initUI() {
-        setSize(400, 200);
+        setSize(400, 250);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel(new GridLayout(3, 1, 10, 10));
-        JLabel label = new JLabel("Select Payment Method", SwingConstants.CENTER);
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        JLabel titleLabel = new JLabel("Checkout - HAWIYA", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+
+        JLabel infoLabel = new JLabel(
+                "Order Total: EGP " + bill.getTotalPrice()
+                        + " | Final: EGP " + bill.getFinalPrice(),
+                SwingConstants.CENTER
+        );
 
         paymentMethodCombo = new JComboBox<>(PaymentMethod.values());
         JButton payButton = new JButton("Pay");
@@ -48,7 +47,6 @@ public class CheckoutPage extends JFrame {
         payButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Bill bill = orderController.getCurrentBill();
                 if (bill.getItems().isEmpty()) {
                     statusLabel.setText("Error: No items in the order!");
                     return;
@@ -62,7 +60,8 @@ public class CheckoutPage extends JFrame {
             }
         });
 
-        panel.add(label);
+        panel.add(titleLabel);
+        panel.add(infoLabel);
         panel.add(paymentMethodCombo);
         panel.add(payButton);
 
